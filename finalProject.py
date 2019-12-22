@@ -71,6 +71,9 @@ if __name__ == '__main__':
     helper.plotErrorRateCurve(err_rate, 'LDA: Threshold vs Error Rate', 'Threshold')
     threshold = helper.getOptimalParameter(err_rate)
 
+    #training using the whole set of training data
+    fld.training(train_x, train_y, threshold)
+
     # do the prediction based on the best threshold
     print('FLD Error Rate: ' + str(fld.predictionErrorRate(test_x, test_y, threshold)))
 
@@ -104,6 +107,9 @@ if __name__ == '__main__':
         knn_training_time[1] += 1
     helper.plotErrorRateCurve(err_rate, 'KNN: K vs Error Rate', 'K')
     k = helper.getOptimalParameter(err_rate)
+
+    #training using the whole set of training data
+    knn.training(train_x, train_y, k)
 
     # do the prediction based on the best threshold
     print('KNN Error Rate:' + str(knn.predictionErrorRate(test_x, test_y, k)))
