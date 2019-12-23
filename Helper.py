@@ -72,17 +72,32 @@ class Helper:
         plt.show()
 
     def plotRocCurve(self, xlabels, prediction, title):
-        fprl = []
-        tprl = []
-        for p in prediction:
-            fpr, tpr, threshold = metrics.roc_curve(xlabels, p)
-            fprl.append(fpr[1])
-            tprl.append(tpr[1])
+        fpr, tpr, threshold = metrics.roc_curve(xlabels, prediction)
+        roc_auc = metrics.auc(fpr, tpr)
         plt.figure()
-        plt.title("ROC Curves")
-        plt.plot(fprl, tprl, label=title)
-        plt.legend(loc=4)
+        plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
+        plt.legend(loc='lower right')
+        plt.plot([0, 1], [0, 1], 'r--')
         plt.xlim([0, 1])
         plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.title(title)
         plt.ion()
         plt.show()
+
+#        fprl = []
+#        tprl = []
+#        for p in prediction:
+#            fpr, tpr, threshold = metrics.roc_curve(xlabels, p)
+#            fprl.append(fpr[1])
+#            tprl.append(tpr[1])
+#        plt.figure()
+#        plt.title("ROC Curves")
+#        plt.plot(fprl, tprl, label=title)
+#        plt.plot([0, 1], [0, 1], 'r-')
+#        plt.legend(loc=4)
+#        plt.xlim([0, 1])
+#        plt.ylim([0, 1])
+#        plt.ion()
+#        plt.show()

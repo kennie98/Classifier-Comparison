@@ -60,7 +60,6 @@ if __name__ == '__main__':
     fld = FLD.FLD()
     knn = KNN.KNN()
     nb = NB.NB()
-    #svm = SVM.SVM()
     helper = Helper.Helper()
 
     print('---------------------------- Fisher\'s Linear Discriminant ----------------------------')
@@ -87,15 +86,14 @@ if __name__ == '__main__':
     helper.plotConfusionMatrix(test_y, fld.predictionResults(test_x, threshold), 'Confusion Matrix of FLD')
 
     # prepare the ROC curve prediction arrays
-    predictions = []
-    for threshold in frange(0.0001, 0.1, 0.000001):
-        start = datetime.now()
-        predictions.append(fld.predictionResults(test_x, threshold))
-        fld_testing_time[0] += getTimeDifference(start)
-        fld_testing_time[1] += 1
+
+    start = datetime.now()
+    prediction=fld.predictionResults(test_x, threshold)
+    fld_testing_time[0] += getTimeDifference(start)
+    fld_testing_time[1] += 1
 
     # plot ROC curve for FLD
-    helper.plotRocCurve(test_y, predictions, 'ROC curve for FLD')
+    helper.plotRocCurve(test_y, prediction, 'ROC curve for FLD')
     print('FLD training time (each iteration): ' + str(fld_training_time[0] / fld_training_time[1]))
     print('FLD testing time (each iteration): ' + str(fld_testing_time[0] / fld_testing_time[1]))
 
@@ -105,7 +103,7 @@ if __name__ == '__main__':
     err_rate = []
     knn_training_time = [timedelta(), 0]
     knn_testing_time = [timedelta(), 0]
-    for k in range(1, 100):
+    for k in range(1, 50):
         start = datetime.now()
         er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, k, knn)
         err_rate.append([k, er])
@@ -124,15 +122,14 @@ if __name__ == '__main__':
     helper.plotConfusionMatrix(test_y, knn.predictionResults(test_x, k), 'Confusion Matrix of KNN')
 
     # prepare the ROC curve prediction arrays
-    predictions = []
-    for k in range(1, 100):
-        start = datetime.now()
-        predictions.append(knn.predictionResults(test_x, k))
-        knn_testing_time[0] += getTimeDifference(start)
-        knn_testing_time[1] += 1
+    start = datetime.now()
+    prediction = knn.predictionResults(test_x, k)
+    knn_testing_time[0] += getTimeDifference(start)
+    knn_testing_time[1] += 1
+
 
     # plot ROC curve for FLD
-    helper.plotRocCurve(test_y, predictions, 'ROC curve for KNN')
+    helper.plotRocCurve(test_y, prediction, 'ROC curve for KNN')
     print('KNN training time (each iteration): ' + str(knn_training_time[0] / knn_training_time[1]))
     print('KNN testing time (each iteration): ' + str(knn_testing_time[0] / knn_testing_time[1]))
 
@@ -161,54 +158,15 @@ if __name__ == '__main__':
     helper.plotConfusionMatrix(test_y, nb.predictionResults(test_x, ratio), 'Confusion Matrix of NB')
 
     # prepare the ROC curve prediction arrays
-    predictions = []
-    for ratio in expRange(-1, 0.2, 10, 0.01):
-        start = datetime.now()
-        predictions.append(nb.predictionResults(test_x, ratio))
-        nb_testing_time[0] += getTimeDifference(start)
-        nb_testing_time[1] += 1
+    start = datetime.now()
+    prediction = nb.predictionResults(test_x, ratio)
+    nb_testing_time[0] += getTimeDifference(start)
+    nb_testing_time[1] += 1
 
     # plot ROC curve for FLD
-    helper.plotRocCurve(test_y, predictions, 'ROC curve for Naive Bias')
+    helper.plotRocCurve(test_y, prediction, 'ROC curve for Naive Bias')
 
     print('NB training time (each iteration): ' + str(nb_training_time[0] / nb_training_time[1]))
     print('NB testing time (each iteration): ' + str(nb_testing_time[0] / nb_testing_time[1]))
-
-#    print('')
-#    print('---------------------------- Support Vector Machine (with Kernel function rbf) ----------------------------')
-#    # SVM: find the best k1 by doing cross-validation
-#    err_rate = []
-#    svm_training_time = [timedelta(), 0]
-#    svm_testing_time = [timedelta(), 0]
-#    for k1 in frange(1.2, 1.4, 0.02):
-#        print('k1 = ' + str(k1))
-#        start = datetime.now()
-#        er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, k1, svm)
-#        err_rate.append([k1, er])
-#        svm_training_time[0] += getTimeDifference(start)
-#        svm_training_time[1] += 1
-#    helper.plotErrorRateCurve(err_rate, 'SVM: Sigma vs Error Rate', 'Sigma')
-#    k1 = helper.getOptimalParameter(err_rate)
-#    svm.training(train_x, train_y, k1)
-#    print('')
-#
-#    # do the prediction based on the best threshold
-#    print('SVM Error Rate at '+str(k1)+': ' + str(svm.predictionErrorRate(test_x, test_y, k1)))
-#
-#    # plot the confusion matrix
-#    helper.plotConfusionMatrix(test_y, svm.predictionResults(test_x, k1), 'Confusion Matrix of SVM')
-#
-#    # prepare the ROC curve prediction arrays
-#    predictions = []
-#    for k1 in frange(1.2, 1.4, 0.02):
-#        start = datetime.now()
-#        predictions.append(svm.predictionResults(test_x, k1))
-#        svm_testing_time[0] += getTimeDifference(start)
-#        svm_testing_time[1] += 1
-#
-#    # plot ROC curve for FLD
-#    helper.plotRocCurve(test_y, predictions, 'ROC curve for SVM')
-#    print('SVM training time (each iteration): ' + str(svm_training_time[0] / svm_training_time[1]))
-#    print('SVM testing time (each iteration): ' + str(svm_testing_time[0] / svm_testing_time[1]))
 
     print('done')
