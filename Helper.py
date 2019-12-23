@@ -71,18 +71,20 @@ class Helper:
         plt.ion()
         plt.show()
 
-    def plotRocCurve(self, xlabels, prediction, title):
+    def newFigure(self):
+        plt.figure()
+
+    def plotRocCurve(self, xlabels, prediction, title, color):
         fpr, tpr, threshold = metrics.roc_curve(xlabels, prediction)
         roc_auc = metrics.auc(fpr, tpr)
-        plt.figure()
-        plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
+        plt.plot(fpr, tpr, color, label=title + ' AUC = %0.2f' % roc_auc)
         plt.legend(loc='lower right')
         plt.plot([0, 1], [0, 1], 'r--')
         plt.xlim([0, 1])
         plt.ylim([0, 1])
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
-        plt.title(title)
+        plt.title('Receiver Operating Characteristic(ROC) curve')
         plt.ion()
         plt.show()
 
