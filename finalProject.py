@@ -18,6 +18,10 @@ def frange(x, y, jump):
         yield x
         x += jump
 
+def expRange(x, y, base, step):
+    while x + step <= y:
+        yield pow(base, x)
+        x += step
 
 def getTimeDifference(start):
     now = datetime.now()  # .microsecond
@@ -77,7 +81,7 @@ if __name__ == '__main__':
     fld.training(train_x, train_y, threshold)
 
     # do the prediction based on the best threshold
-    print('FLD Error Rate: ' + str(fld.predictionErrorRate(test_x, test_y, threshold)))
+    print('FLD Error Rate(threshold='+str(threshold)+'): ' + str(fld.predictionErrorRate(test_x, test_y, threshold)))
 
     # plot the confusion matrix
     helper.plotConfusionMatrix(test_y, fld.predictionResults(test_x, threshold), 'Confusion Matrix of FLD')
@@ -113,8 +117,8 @@ if __name__ == '__main__':
     #training using the whole set of training data
     knn.training(train_x, train_y, k)
 
-    # do the prediction based on the best threshold
-    print('KNN Error Rate:' + str(knn.predictionErrorRate(test_x, test_y, k)))
+    # do the prediction based on the best k
+    print('KNN Error Rate (k='+str(k)+'): ' + str(knn.predictionErrorRate(test_x, test_y, k)))
 
     # plot the confusion matrix
     helper.plotConfusionMatrix(test_y, knn.predictionResults(test_x, k), 'Confusion Matrix of KNN')
@@ -136,25 +140,39 @@ if __name__ == '__main__':
     print('---------------------------- Naive Bayes ----------------------------')
     # Naive Bayes: Since there is no parameter to optimize, the cross-validation and ROC curve part will be omitted
     err_rate = []
-    nb_training_time = timedelta()
-    nb_testing_time = timedelta()
-    dummy = None    # dummy parameter, not used in Naive Bayes
+    nb_training_time = [timedelta(), 0]
+    nb_testing_time = [timedelta(), 0]
+    for ratio in expRange(-1, 0.2, 10, 0.01):
+        start = datetime.now()
+        er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, ratio, nb)
+        err_rate.append([ratio, er])
+        nb_training_time[0] += getTimeDifference(start)
+        nb_training_time[1] += 1
+    helper.plotErrorRateCurve(err_rate, 'Naive Bayes: ratio vs Error Rate', 'ratio')
+    ratio = helper.getOptimalParameter(err_rate)
 
-    start = datetime.now()
     #training using the whole set of training data
-    nb.training(train_x, train_y, dummy)
-    nb_training_time = getTimeDifference(start)
+    nb.training(train_x, train_y, ratio)
 
-    start = datetime.now()
-    # do the prediction based on the best threshold
-    print('NB Error Rate:' + str(nb.predictionErrorRate(test_x, test_y, dummy)))
-    nb_testing_time = getTimeDifference(start)
+    # do the prediction based on the best ratio
+    print('NB Error Rate (ratio='+str(ratio)+'): ' + str(nb.predictionErrorRate(test_x, test_y, ratio)))
 
     # plot the confusion matrix
-    helper.plotConfusionMatrix(test_y, nb.predictionResults(test_x, dummy), 'Confusion Matrix of NB')
+    helper.plotConfusionMatrix(test_y, nb.predictionResults(test_x, ratio), 'Confusion Matrix of NB')
 
-    print('NB training time (each iteration): ' + str(nb_training_time))
-    print('NB testing time (each iteration): ' + str(nb_testing_time))
+    # prepare the ROC curve prediction arrays
+    predictions = []
+    for ratio in expRange(-1, 0.2, 10, 0.01):
+        start = datetime.now()
+        predictions.append(nb.predictionResults(test_x, ratio))
+        nb_testing_time[0] += getTimeDifference(start)
+        nb_testing_time[1] += 1
+
+    # plot ROC curve for FLD
+    helper.plotRocCurve(test_y, predictions, 'ROC curve for Naive Bias')
+
+    print('NB training time (each iteration): ' + str(nb_training_time[0] / nb_training_time[1]))
+    print('NB testing time (each iteration): ' + str(nb_testing_time[0] / nb_testing_time[1]))
 
 #    print('')
 #    print('---------------------------- Support Vector Machine (with Kernel function rbf) ----------------------------')
@@ -175,7 +193,7 @@ if __name__ == '__main__':
 #    print('')
 #
 #    # do the prediction based on the best threshold
-#    print('SVM Error Rate at'+str(k1)+': ' + str(svm.predictionErrorRate(test_x, test_y, k1)))
+#    print('SVM Error Rate at '+str(k1)+': ' + str(svm.predictionErrorRate(test_x, test_y, k1)))
 #
 #    # plot the confusion matrix
 #    helper.plotConfusionMatrix(test_y, svm.predictionResults(test_x, k1), 'Confusion Matrix of SVM')

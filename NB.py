@@ -139,7 +139,7 @@ class NB(object):
                                                                                   self.symbolMean], \
                                                                               self.probability_info[col][
                                                                                   self.symbolResultNegative][
-                                                                                  self.symbolVariance])
+                                                                                  self.symbolVariance]*parameter)
             result.append(
                 self.symbolResultPositive if probability[i][self.symbolResultPositive] >= probability[i][
                     self.symbolResultNegative] else self.symbolResultNegative)
