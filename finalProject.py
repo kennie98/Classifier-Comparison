@@ -3,7 +3,8 @@ import Helper
 from sklearn.preprocessing import MinMaxScaler
 import FLD
 import KNN
-import SVM
+import NB
+#import SVM
 from datetime import datetime, timedelta
 
 TRAINNING_DATA_SIZE = 840  # make sure that this is divisible by CV_DATA_GROUP
@@ -54,6 +55,7 @@ if __name__ == '__main__':
     train_x, train_y, train_cv_x, train_cv_y, test_x, test_y, dimension = readData('messidor_features.csv')
     fld = FLD.FLD()
     knn = KNN.KNN()
+    nb = NB.NB()
     #svm = SVM.SVM()
     helper = Helper.Helper()
 
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     fld_training_time = [timedelta(), 0]
     fld_testing_time = [timedelta(), 0]
     for threshold in frange(0.001, 0.004, 0.000001):
-        start = datetime.now()  # .microsecond
+        start = datetime.now()
         er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, threshold, fld)
         err_rate.append([threshold, er])
         fld_training_time[0] += getTimeDifference(start)
@@ -83,7 +85,7 @@ if __name__ == '__main__':
     # prepare the ROC curve prediction arrays
     predictions = []
     for threshold in frange(0.0001, 0.1, 0.000001):
-        start = datetime.now()  # .microsecond
+        start = datetime.now()
         predictions.append(fld.predictionResults(test_x, threshold))
         fld_testing_time[0] += getTimeDifference(start)
         fld_testing_time[1] += 1
@@ -100,7 +102,7 @@ if __name__ == '__main__':
     knn_training_time = [timedelta(), 0]
     knn_testing_time = [timedelta(), 0]
     for k in range(1, 100):
-        start = datetime.now()  # .microsecond
+        start = datetime.now()
         er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, k, knn)
         err_rate.append([k, er])
         knn_training_time[0] += getTimeDifference(start)
@@ -120,7 +122,7 @@ if __name__ == '__main__':
     # prepare the ROC curve prediction arrays
     predictions = []
     for k in range(1, 100):
-        start = datetime.now()  # .microsecond
+        start = datetime.now()
         predictions.append(knn.predictionResults(test_x, k))
         knn_testing_time[0] += getTimeDifference(start)
         knn_testing_time[1] += 1
@@ -130,6 +132,30 @@ if __name__ == '__main__':
     print('KNN training time (each iteration): ' + str(knn_training_time[0] / knn_training_time[1]))
     print('KNN testing time (each iteration): ' + str(knn_testing_time[0] / knn_testing_time[1]))
 
+    print('')
+    print('---------------------------- Naive Bayes ----------------------------')
+    # Naive Bayes: Since there is no parameter to optimize, the cross-validation and ROC curve part will be omitted
+    err_rate = []
+    nb_training_time = timedelta()
+    nb_testing_time = timedelta()
+    dummy = None    # dummy parameter, not used in Naive Bayes
+
+    start = datetime.now()
+    #training using the whole set of training data
+    nb.training(train_x, train_y, dummy)
+    nb_training_time = getTimeDifference(start)
+
+    start = datetime.now()
+    # do the prediction based on the best threshold
+    print('NB Error Rate:' + str(nb.predictionErrorRate(test_x, test_y, dummy)))
+    nb_testing_time = getTimeDifference(start)
+
+    # plot the confusion matrix
+    helper.plotConfusionMatrix(test_y, nb.predictionResults(test_x, dummy), 'Confusion Matrix of NB')
+
+    print('NB training time (each iteration): ' + str(nb_training_time))
+    print('NB testing time (each iteration): ' + str(nb_testing_time))
+
 #    print('')
 #    print('---------------------------- Support Vector Machine (with Kernel function rbf) ----------------------------')
 #    # SVM: find the best k1 by doing cross-validation
@@ -138,7 +164,7 @@ if __name__ == '__main__':
 #    svm_testing_time = [timedelta(), 0]
 #    for k1 in frange(1.2, 1.4, 0.02):
 #        print('k1 = ' + str(k1))
-#        start = datetime.now()  # .microsecond
+#        start = datetime.now()
 #        er = helper.crossValidation(train_cv_x, train_cv_y, CROSS_VALIDATION_DATA_GROUP, k1, svm)
 #        err_rate.append([k1, er])
 #        svm_training_time[0] += getTimeDifference(start)
@@ -157,7 +183,7 @@ if __name__ == '__main__':
 #    # prepare the ROC curve prediction arrays
 #    predictions = []
 #    for k1 in frange(1.2, 1.4, 0.02):
-#        start = datetime.now()  # .microsecond
+#        start = datetime.now()
 #        predictions.append(svm.predictionResults(test_x, k1))
 #        svm_testing_time[0] += getTimeDifference(start)
 #        svm_testing_time[1] += 1

@@ -68,6 +68,7 @@ class Helper:
         ax.set_yticklabels([''] + labels)
         plt.xlabel('Predicted Label')
         plt.ylabel('True Label')
+        plt.ion()
         plt.show()
 
     def plotRocCurve(self, xlabels, prediction, title):
@@ -83,4 +84,5 @@ class Helper:
         plt.legend(loc=4)
         plt.xlim([0, 1])
         plt.ylim([0, 1])
+        plt.ion()
         plt.show()
